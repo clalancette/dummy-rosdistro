@@ -1,2 +1,20 @@
 rosdep:
   - rosdep/*
+
+kinetic:
+  - kinetic/*
+
+melodic:
+  - melodic/*
+
+noetic:
+  - noetic/*
+
+dashing:
+  - dashing/*
+
+foxy:
+  - foxy/*
+
+rolling:
+  - rolling/*
