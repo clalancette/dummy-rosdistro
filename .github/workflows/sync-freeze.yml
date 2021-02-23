@@ -1,0 +1,9 @@
+name: "Check for Sync Freeze"
+on:
+- pull_request_target
+jobs:
+  check-distro-freeze:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - run: ls
