@@ -14,3 +14,5 @@ acpi:
   fedora: [acpi]
   gentoo: [sys-power/acpi]
   ubuntu: [acpi]
+kernel:
+  debian: [kernel]
