@@ -1,0 +1,13 @@
+distribution:
+  rolling:
+    freeze: false
+  dashing:
+    freeze: false
+  foxy:
+    freeze: false
+  kinetic:
+    freeze: false
+  melodic:
+    freeze: false
+  noetic:
+    freeze: false
