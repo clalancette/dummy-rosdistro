@@ -1,4 +1,6 @@
-distribution:
+%YAML 1.1
+---
+distributions:
   rolling:
     freeze: false
   dashing:
