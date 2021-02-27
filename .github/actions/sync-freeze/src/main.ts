@@ -46,6 +46,7 @@ async function run() {
       frozen_distros.set(distro, sync_freeze["distributions"][distro]["freeze"]);
     }
 
+      console.log(`Frozen distros: ${frozen_distros}`);
       for (const filename of changedFiles) {
           console.log(`filename is ${filename}`);
         const modified_distro = path.dirname(filename);
