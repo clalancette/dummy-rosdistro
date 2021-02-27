@@ -44,6 +44,8 @@ async function run() {
       console.log(`Saw distribution ${distro}`);
         if (sync_freeze["distributions"][distro]["freeze"]) {
             console.log("In freeze!");
+            const repo = github.context.repo;
+            client.issues.createComment({...repo, body: "hello", issue_number: prNumber});
         } else {
             console.log("Not in freeze");
       }
