@@ -14551,26 +14551,30 @@ function run() {
                 repo: github.context.repo.repo,
                 pull_number: prNumber
             });
+            console.log(`fetching changed files for pr #${prNumber}`);
             core.debug(`fetching changed files for pr #${prNumber}`);
             const changedFiles = yield getChangedFiles(client, prNumber);
-            const labelGlobs = yield getLabelGlobs(client, configPath);
-            const labels = [];
-            const labelsToRemove = [];
-            for (const [label, globs] of labelGlobs.entries()) {
-                core.debug(`processing ${label}`);
-                if (checkGlobs(changedFiles, globs)) {
-                    labels.push(label);
-                }
-                else if (pullRequest.labels.find(l => l.name === label)) {
-                    labelsToRemove.push(label);
-                }
-            }
-            if (labels.length > 0) {
-                yield addLabels(client, prNumber, labels);
-            }
-            if (syncLabels && labelsToRemove.length) {
-                yield removeLabels(client, prNumber, labelsToRemove);
-            }
+            console.log(`changed files: ${changedFiles}`);
+            // const labelGlobs: Map<string, StringOrMatchConfig[]> = await getLabelGlobs(
+            //   client,
+            //   configPath
+            // );
+            // const labels: string[] = [];
+            // const labelsToRemove: string[] = [];
+            // for (const [label, globs] of labelGlobs.entries()) {
+            //   core.debug(`processing ${label}`);
+            //   if (checkGlobs(changedFiles, globs)) {
+            //     labels.push(label);
+            //   } else if (pullRequest.labels.find(l => l.name === label)) {
+            //     labelsToRemove.push(label);
+            //   }
+            // }
+            // if (labels.length > 0) {
+            //   await addLabels(client, prNumber, labels);
+            // }
+            // if (syncLabels && labelsToRemove.length) {
+            //   await removeLabels(client, prNumber, labelsToRemove);
+            // }
         }
         catch (error) {
             core.error(error);

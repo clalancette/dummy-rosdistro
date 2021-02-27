@@ -30,33 +30,35 @@ async function run() {
       pull_number: prNumber
     });
 
-    core.error(`This is an error log`);
-    core.debug(`This is a debug log`);
+    console.log(`fetching changed files for pr #${prNumber}`);
+
     core.debug(`fetching changed files for pr #${prNumber}`);
     const changedFiles: string[] = await getChangedFiles(client, prNumber);
-    const labelGlobs: Map<string, StringOrMatchConfig[]> = await getLabelGlobs(
-      client,
-      configPath
-    );
+    console.log(`changed files: ${changedFiles}`);
 
-    const labels: string[] = [];
-    const labelsToRemove: string[] = [];
-    for (const [label, globs] of labelGlobs.entries()) {
-      core.debug(`processing ${label}`);
-      if (checkGlobs(changedFiles, globs)) {
-        labels.push(label);
-      } else if (pullRequest.labels.find(l => l.name === label)) {
-        labelsToRemove.push(label);
-      }
-    }
+    // const labelGlobs: Map<string, StringOrMatchConfig[]> = await getLabelGlobs(
+    //   client,
+    //   configPath
+    // );
 
-    if (labels.length > 0) {
-      await addLabels(client, prNumber, labels);
-    }
+    // const labels: string[] = [];
+    // const labelsToRemove: string[] = [];
+    // for (const [label, globs] of labelGlobs.entries()) {
+    //   core.debug(`processing ${label}`);
+    //   if (checkGlobs(changedFiles, globs)) {
+    //     labels.push(label);
+    //   } else if (pullRequest.labels.find(l => l.name === label)) {
+    //     labelsToRemove.push(label);
+    //   }
+    // }
 
-    if (syncLabels && labelsToRemove.length) {
-      await removeLabels(client, prNumber, labelsToRemove);
-    }
+    // if (labels.length > 0) {
+    //   await addLabels(client, prNumber, labels);
+    // }
+
+    // if (syncLabels && labelsToRemove.length) {
+    //   await removeLabels(client, prNumber, labelsToRemove);
+    // }
   } catch (error) {
     core.error(error);
     core.setFailed(error.message);
