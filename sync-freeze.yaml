@@ -2,7 +2,7 @@
 ---
 distributions:
   rolling:
-    freeze: false
+    freeze: true
   dashing:
     freeze: false
   foxy:
