@@ -30,6 +30,8 @@ async function run() {
       pull_number: prNumber
     });
 
+    core.error(`This is an error log`);
+    core.debug(`This is a debug log`);
     core.debug(`fetching changed files for pr #${prNumber}`);
     const changedFiles: string[] = await getChangedFiles(client, prNumber);
     const labelGlobs: Map<string, StringOrMatchConfig[]> = await getLabelGlobs(

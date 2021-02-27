@@ -77,10 +77,10 @@ frontend:
 
 ### Create Workflow
 
-Create a workflow (eg: `.github/workflows/labeler.yml` see [Creating a Workflow file](https://help.github.com/en/articles/configuring-a-workflow#creating-a-workflow-file)) to utilize the labeler action with content:
+Create a workflow (eg: `.github/workflows/sync-freeze.yml` see [Creating a Workflow file](https://help.github.com/en/articles/configuring-a-workflow#creating-a-workflow-file)) to utilize the sync-freeze action with content:
 
 ```
-name: "Pull Request Labeler"
+name: "Sync freeze"
 on:
 - pull_request_target
 
@@ -88,7 +88,7 @@ jobs:
   triage:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/labeler@main
+    - uses: actions/sync-freeze
       with:
         repo-token: "${{ secrets.GITHUB_TOKEN }}"
 ```
