@@ -14560,10 +14560,12 @@ function run() {
             console.log(`About to read sync-freeze.yml`);
             const sync_freeze = readSyncFreeze("sync-freeze.yaml");
             const frozen_distros = new Map();
-            for (const distro in sync_freeze["distributions"]) {
+            for (const distro of sync_freeze["distributions"]) {
                 frozen_distros.set(distro, sync_freeze["distributions"][distro]["freeze"]);
             }
-            console.log(`Frozen distros: ${frozen_distros}`);
+            for (const distro of frozen_distros.keys()) {
+                console.log(`Frozen distros: ${distro}`);
+            }
             for (const filename of changedFiles) {
                 console.log(`filename is ${filename}`);
                 const modified_distro = path.dirname(filename);
