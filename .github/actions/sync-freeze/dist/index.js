@@ -14557,7 +14557,7 @@ function run() {
             const changedFiles = yield getChangedFiles(client, prNumber);
             console.log(`changed files: ${changedFiles}`);
             console.log(`About to read sync-freeze.yml`);
-            const sync_freeze = readSyncFreeze("sync-freeze.yml");
+            const sync_freeze = readSyncFreeze("sync-freeze.yaml");
             for (const label in sync_freeze) {
                 console.log(`Saw yaml ${label}`);
             }
