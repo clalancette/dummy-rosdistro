@@ -6,6 +6,10 @@ jobs:
   check-distro-freeze:
     runs-on: ubuntu-latest
     steps:
-    - uses: ./.github/actions/sync-freeze
+    - name: Clone Repo
+      uses: actions/checkout@v2
+
+    - name: Sync Freeze Check
+      uses: ./.github/actions/sync-freeze
       with:
         repo-token: "${{ secrets.GITHUB_TOKEN }}"
