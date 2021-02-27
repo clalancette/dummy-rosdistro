@@ -51,13 +51,13 @@ async function run() {
       }
       for (const filename of changedFiles) {
           console.log(`filename is ${filename}`);
-        const modified_distro = path.dirname(filename);
-        console.log(`Modified distro is ${modified_distro}`);
-        if (frozen_distros.has(modified_distro) && frozen_distros[modified_distro]) {
-            console.log("In freeze!");
-            const repo = github.context.repo;
-            client.issues.createComment({...repo, body: "hello", issue_number: prNumber});
-        }
+          const modified_distro = path.dirname(filename);
+          console.log(`Modified distro is ${modified_distro}`);
+          if (frozen_distros.has(modified_distro) && frozen_distros.get(modified_distro)) {
+              console.log("In freeze!");
+              const repo = github.context.repo;
+              client.issues.createComment({...repo, body: "hello", issue_number: prNumber});
+          }
     }
   //   for (const distro in sync_freeze["distributions"]) {
   //     console.log(`Saw distribution ${distro}`);

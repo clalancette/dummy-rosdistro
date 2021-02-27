@@ -14570,7 +14570,7 @@ function run() {
                 console.log(`filename is ${filename}`);
                 const modified_distro = path.dirname(filename);
                 console.log(`Modified distro is ${modified_distro}`);
-                if (frozen_distros.has(modified_distro) && frozen_distros[modified_distro]) {
+                if (frozen_distros.has(modified_distro) && frozen_distros.get(modified_distro)) {
                     console.log("In freeze!");
                     const repo = github.context.repo;
                     client.issues.createComment(Object.assign(Object.assign({}, repo), { body: "hello", issue_number: prNumber }));
