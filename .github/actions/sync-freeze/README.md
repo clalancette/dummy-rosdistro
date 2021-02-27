@@ -4,7 +4,7 @@ Pull request labeler triages PRs based on the paths that are modified in the PR.
 
 ## Usage
 
-### Create `.github/labeler.yml`
+### Create `.github/sync-freeze.yml`
 
 Create a `.github/labeler.yml` file with a list of labels and [minimatch](https://github.com/isaacs/minimatch) globs to match to apply the label.
 
@@ -102,5 +102,15 @@ Various inputs are defined in [`action.yml`](action.yml) to let you configure th
 | Name | Description | Default |
 | - | - | - |
 | `repo-token` | Token to use to authorize label changes. Typically the GITHUB_TOKEN secret | N/A |
-| `configuration-path` | The path to the label configuration file | `.github/labeler.yml` |
-| `sync-labels` | Whether or not to remove labels when matching files are reverted or no longer changed by the PR | `false`
+| `configuration-path` | The path to the label configuration file | `.github/sync-freeze.yml` |
+
+## Building
+
+This project is written in [TypeScript](https://www.typescriptlang.org/), a typed variant of JavaScript.
+
+Because of how GitHub Actions are run, the source code of this project is transpiled from TypeScript into JavaScript. The transpiled code (found in `lib/`) is subsequently compiled using [NCC](https://github.com/vercel/ncc/blob/master/readme.md) avoid having to include the `node_modules/` directory in the repository.
+
+To build the transpiled code:
+
+1. Configure and install the dependencies: `npm install`
+1. Make your change and build the action using `npm run build`
