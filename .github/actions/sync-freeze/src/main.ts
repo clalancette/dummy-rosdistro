@@ -10,6 +10,8 @@ interface MatchConfig {
 
 type StringOrMatchConfig = string | MatchConfig;
 
+const fs = require("fs");
+
 async function run() {
   try {
     const token = core.getInput("repo-token", { required: true });
@@ -35,6 +37,12 @@ async function run() {
     core.debug(`fetching changed files for pr #${prNumber}`);
     const changedFiles: string[] = await getChangedFiles(client, prNumber);
     console.log(`changed files: ${changedFiles}`);
+
+    console.log(`About to read sync-freeze.yml`);
+    const sync_freeze = readSyncFreeze("sync-freeze.yml");
+    for (const label in sync_freeze) {
+      console.log(`Saw yaml ${label}`);
+    }
 
     // const labelGlobs: Map<string, StringOrMatchConfig[]> = await getLabelGlobs(
     //   client,
@@ -93,6 +101,14 @@ async function getChangedFiles(
   }
 
   return changedFiles;
+}
+
+function readSyncFreeze(filename: string) {
+  const rawdata = fs.readFileSync(filename);
+
+  const sync_freeze: any = yaml.safeLoad(rawdata);
+
+  return sync_freeze
 }
 
 async function getLabelGlobs(

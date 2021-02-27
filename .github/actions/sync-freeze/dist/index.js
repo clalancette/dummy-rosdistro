@@ -14534,6 +14534,7 @@ const core = __importStar(__webpack_require__(186));
 const github = __importStar(__webpack_require__(438));
 const yaml = __importStar(__webpack_require__(917));
 const minimatch_1 = __webpack_require__(973);
+const fs = __webpack_require__(747);
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -14555,6 +14556,11 @@ function run() {
             core.debug(`fetching changed files for pr #${prNumber}`);
             const changedFiles = yield getChangedFiles(client, prNumber);
             console.log(`changed files: ${changedFiles}`);
+            console.log(`About to read sync-freeze.yml`);
+            const sync_freeze = readSyncFreeze("sync-freeze.yml");
+            for (const label in sync_freeze) {
+                console.log(`Saw yaml ${label}`);
+            }
             // const labelGlobs: Map<string, StringOrMatchConfig[]> = await getLabelGlobs(
             //   client,
             //   configPath
@@ -14604,6 +14610,11 @@ function getChangedFiles(client, prNumber) {
         }
         return changedFiles;
     });
+}
+function readSyncFreeze(filename) {
+    const rawdata = fs.readFileSync(filename);
+    const sync_freeze = yaml.safeLoad(rawdata);
+    return sync_freeze;
 }
 function getLabelGlobs(client, configurationPath) {
     return __awaiter(this, void 0, void 0, function* () {
