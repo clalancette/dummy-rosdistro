@@ -40,8 +40,13 @@ async function run() {
 
     console.log(`About to read sync-freeze.yml`);
     const sync_freeze = readSyncFreeze("sync-freeze.yaml");
-    for (const label in sync_freeze) {
-      console.log(`Saw yaml ${label}`);
+    for (const distro in sync_freeze["distributions"]) {
+      console.log(`Saw distribution ${distro}`);
+        if (sync_freeze["distributions"][distro]["freeze"]) {
+            console.log("In freeze!");
+        } else {
+            console.log("Not in freeze");
+      }
     }
 
     // const labelGlobs: Map<string, StringOrMatchConfig[]> = await getLabelGlobs(
