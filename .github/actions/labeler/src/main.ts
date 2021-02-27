@@ -13,7 +13,13 @@ type StringOrMatchConfig = string | MatchConfig;
 async function run() {
   try {
     const token = core.getInput("repo-token", { required: true });
-    const configPath = core.getInput("configuration-path", { required: false });
+    const configPath = core.getInput("configuration-path", { required: true });
+    const syncLabels = !!core.getInput("sync-labels", { required: false });
+
+    console.log("Console log");
+    core.debug(`debug core`);
+    core.info(`info core`);
+    core.error(`error core`);
 
     const prNumber = getPrNumber();
     if (!prNumber) {
@@ -29,11 +35,6 @@ async function run() {
       pull_number: prNumber
     });
 
-    core.info(`This is an info log`);
-    console.log(`This is a console log`);
-    console.log("This is a console log");
-    core.error(`This is an error log`);
-    core.debug(`This is a debug log`);
     core.debug(`fetching changed files for pr #${prNumber}`);
     const changedFiles: string[] = await getChangedFiles(client, prNumber);
     const labelGlobs: Map<string, StringOrMatchConfig[]> = await getLabelGlobs(
@@ -56,6 +57,9 @@ async function run() {
       await addLabels(client, prNumber, labels);
     }
 
+    if (syncLabels && labelsToRemove.length) {
+      await removeLabels(client, prNumber, labelsToRemove);
+    }
   } catch (error) {
     core.error(error);
     core.setFailed(error.message);
