@@ -11,6 +11,7 @@ interface MatchConfig {
 type StringOrMatchConfig = string | MatchConfig;
 
 const fs = require("fs");
+const path = require("path");
 
 async function run() {
   try {
@@ -40,16 +41,45 @@ async function run() {
 
     console.log(`About to read sync-freeze.yml`);
     const sync_freeze = readSyncFreeze("sync-freeze.yaml");
+    const frozen_distros: Map<string, boolean> = new Map();
     for (const distro in sync_freeze["distributions"]) {
-      console.log(`Saw distribution ${distro}`);
-        if (sync_freeze["distributions"][distro]["freeze"]) {
+      frozen_distros.set(distro, sync_freeze["distributions"][distro]["freeze"]);
+    }
+
+    for (const filename in changedFiles) {
+        const modified_distro = path.dirname("filename");
+        console.log(`Modified distro is ${modified_distro}`);
+        if (frozen_distros.has(modified_distro) && frozen_distros[modified_distro]) {
             console.log("In freeze!");
             const repo = github.context.repo;
             client.issues.createComment({...repo, body: "hello", issue_number: prNumber});
-        } else {
-            console.log("Not in freeze");
-      }
+        }
     }
+  //   for (const distro in sync_freeze["distributions"]) {
+  //     console.log(`Saw distribution ${distro}`);
+  //       if (sync_freeze["distributions"][distro]["freeze"]) {
+  //           console.log("In freeze!");
+  //           const repo = github.context.repo;
+  //           client.issues.createComment({...repo, body: "hello", issue_number: prNumber});
+  //       } else {
+  //           console.log("Not in freeze");
+  //     }
+  //   }
+
+  // const labelGlobs: Map<string, StringOrMatchConfig[]> = new Map();
+  // for (const label in configObject) {
+  //   if (typeof configObject[label] === "string") {
+  //     labelGlobs.set(label, [configObject[label]]);
+  //   } else if (configObject[label] instanceof Array) {
+  //     labelGlobs.set(label, configObject[label]);
+  //   } else {
+  //     throw Error(
+  //       `found unexpected type for label ${label} (should be string or array of globs)`
+  //     );
+  //   }
+  // }
+
+  // return labelGlobs;
 
     // const labelGlobs: Map<string, StringOrMatchConfig[]> = await getLabelGlobs(
     //   client,
