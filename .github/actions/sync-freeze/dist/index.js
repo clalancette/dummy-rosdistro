@@ -14541,7 +14541,6 @@ function run() {
         try {
             const token = core.getInput("repo-token", { required: true });
             const configPath = core.getInput("configuration-path", { required: true });
-            const syncLabels = !!core.getInput("sync-labels", { required: false });
             const prNumber = getPrNumber();
             if (!prNumber) {
                 console.log("Could not get pull request number from context, exiting");
@@ -14563,6 +14562,7 @@ function run() {
             for (const distro in sync_freeze["distributions"]) {
                 frozen_distros.set(distro, sync_freeze["distributions"][distro]["freeze"]);
             }
+            const repo = github.context.repo;
             for (const distro of frozen_distros.keys()) {
                 console.log(`Frozen distros: ${distro}`);
             }
@@ -14572,10 +14572,10 @@ function run() {
                 console.log(`Modified distro is ${modified_distro}`);
                 if (frozen_distros.has(modified_distro) && frozen_distros.get(modified_distro)) {
                     console.log("In freeze!");
-                    const repo = github.context.repo;
                     client.issues.createComment(Object.assign(Object.assign({}, repo), { body: "hello", issue_number: prNumber }));
                 }
             }
+            const prList = getOpenPRs(client);
             //   for (const distro in sync_freeze["distributions"]) {
             //     console.log(`Saw distribution ${distro}`);
             //       if (sync_freeze["distributions"][distro]["freeze"]) {
@@ -14653,6 +14653,18 @@ function readSyncFreeze(filename) {
     const rawdata = fs.readFileSync(filename);
     const sync_freeze = yaml.safeLoad(rawdata);
     return sync_freeze;
+}
+function getOpenPRs(client) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const prList = yield client.pulls.list({
+            owner: github.context.repo.owner,
+            repo: github.context.repo.repo
+        });
+        for (const pr of prList) {
+            console.log(`PR: ${pr}`);
+        }
+        return new Array();
+    });
 }
 function getLabelGlobs(client, configurationPath) {
     return __awaiter(this, void 0, void 0, function* () {

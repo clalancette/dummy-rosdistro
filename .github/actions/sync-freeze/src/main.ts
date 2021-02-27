@@ -14,51 +14,54 @@ const fs = require("fs");
 const path = require("path");
 
 async function run() {
-  try {
-    const token = core.getInput("repo-token", { required: true });
-    const configPath = core.getInput("configuration-path", { required: true });
-    const syncLabels = !!core.getInput("sync-labels", { required: false });
+    try {
+        const token = core.getInput("repo-token", { required: true });
+        const configPath = core.getInput("configuration-path", { required: true });
 
-    const prNumber = getPrNumber();
-    if (!prNumber) {
-      console.log("Could not get pull request number from context, exiting");
-      return;
-    }
+        const prNumber = getPrNumber();
+        if (!prNumber) {
+            console.log("Could not get pull request number from context, exiting");
+            return;
+        }
 
-    const client = new github.GitHub(token);
+        const client = new github.GitHub(token);
 
-    const { data: pullRequest } = await client.pulls.get({
-      owner: github.context.repo.owner,
-      repo: github.context.repo.repo,
-      pull_number: prNumber
-    });
+        const { data: pullRequest } = await client.pulls.get({
+            owner: github.context.repo.owner,
+            repo: github.context.repo.repo,
+            pull_number: prNumber
+        });
 
-    console.log(`fetching changed files for pr #${prNumber}`);
+        console.log(`fetching changed files for pr #${prNumber}`);
 
-    core.debug(`fetching changed files for pr #${prNumber}`);
-    const changedFiles: string[] = await getChangedFiles(client, prNumber);
-    console.log(`changed files: ${changedFiles}`);
+        core.debug(`fetching changed files for pr #${prNumber}`);
+        const changedFiles: string[] = await getChangedFiles(client, prNumber);
+        console.log(`changed files: ${changedFiles}`);
 
-    console.log(`About to read sync-freeze.yml`);
-    const sync_freeze = readSyncFreeze("sync-freeze.yaml");
-    const frozen_distros: Map<string, boolean> = new Map();
-    for (const distro in sync_freeze["distributions"]) {
-      frozen_distros.set(distro, sync_freeze["distributions"][distro]["freeze"]);
-    }
+        console.log(`About to read sync-freeze.yml`);
+        const sync_freeze = readSyncFreeze("sync-freeze.yaml");
+        const frozen_distros: Map<string, boolean> = new Map();
+        for (const distro in sync_freeze["distributions"]) {
+            frozen_distros.set(distro, sync_freeze["distributions"][distro]["freeze"]);
+        }
 
-      for (const distro of frozen_distros.keys()) {
-          console.log(`Frozen distros: ${distro}`);
-      }
-      for (const filename of changedFiles) {
-          console.log(`filename is ${filename}`);
-          const modified_distro = path.dirname(filename);
-          console.log(`Modified distro is ${modified_distro}`);
-          if (frozen_distros.has(modified_distro) && frozen_distros.get(modified_distro)) {
-              console.log("In freeze!");
-              const repo = github.context.repo;
-              client.issues.createComment({...repo, body: "hello", issue_number: prNumber});
-          }
-    }
+        const repo = github.context.repo;
+
+        for (const distro of frozen_distros.keys()) {
+            console.log(`Frozen distros: ${distro}`);
+        }
+        for (const filename of changedFiles) {
+            console.log(`filename is ${filename}`);
+            const modified_distro = path.dirname(filename);
+            console.log(`Modified distro is ${modified_distro}`);
+            if (frozen_distros.has(modified_distro) && frozen_distros.get(modified_distro)) {
+                console.log("In freeze!");
+                client.issues.createComment({...repo, body: "hello", issue_number: prNumber});
+            }
+        }
+
+        const prList = getOpenPRs(client);
+
   //   for (const distro in sync_freeze["distributions"]) {
   //     console.log(`Saw distribution ${distro}`);
   //       if (sync_freeze["distributions"][distro]["freeze"]) {
@@ -145,11 +148,24 @@ async function getChangedFiles(
 }
 
 function readSyncFreeze(filename: string) {
-  const rawdata = fs.readFileSync(filename);
+    const rawdata = fs.readFileSync(filename);
 
-  const sync_freeze: any = yaml.safeLoad(rawdata);
+    const sync_freeze: any = yaml.safeLoad(rawdata);
 
-  return sync_freeze
+    return sync_freeze
+}
+
+async function getOpenPRs(client: github.GitHub): Promise<number[]> {
+    const prList = await client.pulls.list({
+        owner: github.context.repo.owner,
+        repo: github.context.repo.repo
+    })
+
+    for (const pr of prList) {
+        console.log(`PR: ${pr}`);
+    }
+
+    return new Array<number>();
 }
 
 async function getLabelGlobs(
