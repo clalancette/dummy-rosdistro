@@ -14563,7 +14563,7 @@ function run() {
             for (const distro in sync_freeze["distributions"]) {
                 frozen_distros.set(distro, sync_freeze["distributions"][distro]["freeze"]);
             }
-            for (const filename in changedFiles) {
+            for (const filename of changedFiles) {
                 console.log(`filename is ${filename}`);
                 const modified_distro = path.dirname(filename);
                 console.log(`Modified distro is ${modified_distro}`);
