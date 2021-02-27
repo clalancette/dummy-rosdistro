@@ -42,7 +42,7 @@ async function run() {
     console.log(`About to read sync-freeze.yml`);
     const sync_freeze = readSyncFreeze("sync-freeze.yaml");
     const frozen_distros: Map<string, boolean> = new Map();
-    for (const distro of sync_freeze["distributions"]) {
+    for (const distro in sync_freeze["distributions"]) {
       frozen_distros.set(distro, sync_freeze["distributions"][distro]["freeze"]);
     }
 
