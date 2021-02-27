@@ -14538,7 +14538,8 @@ function run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             const token = core.getInput("repo-token", { required: true });
-            const configPath = core.getInput("configuration-path", { required: false });
+            const configPath = core.getInput("configuration-path", { required: true });
+            const syncLabels = !!core.getInput("sync-labels", { required: false });
             const prNumber = getPrNumber();
             if (!prNumber) {
                 console.log("Could not get pull request number from context, exiting");
@@ -14550,11 +14551,6 @@ function run() {
                 repo: github.context.repo.repo,
                 pull_number: prNumber
             });
-            core.info(`This is an info log`);
-            console.log(`This is a console log`);
-            console.log("This is a console log");
-            core.error(`This is an error log`);
-            core.debug(`This is a debug log`);
             core.debug(`fetching changed files for pr #${prNumber}`);
             const changedFiles = yield getChangedFiles(client, prNumber);
             const labelGlobs = yield getLabelGlobs(client, configPath);
@@ -14571,6 +14567,9 @@ function run() {
             }
             if (labels.length > 0) {
                 yield addLabels(client, prNumber, labels);
+            }
+            if (syncLabels && labelsToRemove.length) {
+                yield removeLabels(client, prNumber, labelsToRemove);
             }
         }
         catch (error) {
