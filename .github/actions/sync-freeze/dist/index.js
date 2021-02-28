@@ -14660,9 +14660,7 @@ function getOpenPRs(client) {
             owner: github.context.repo.owner,
             repo: github.context.repo.repo
         });
-        for (const pr of prList) {
-            console.log(`PR: ${pr}`);
-        }
+        console.log('pullRequestList: ' + JSON.stringify(prList));
         return new Array();
     });
 }
