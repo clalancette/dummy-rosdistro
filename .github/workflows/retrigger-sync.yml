@@ -10,4 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     if: github.event.pull_request.merged == true
     steps:
-      - echo "hello"
+    - name: Rekick open PRs
+      uses: ./.github/actions/kick-open-prs
+      with:
+        repo-token: "${{ secrets.GITHUB_TOKEN }}"
