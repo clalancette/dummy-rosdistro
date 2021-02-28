@@ -6,7 +6,7 @@ distributions:
   dashing:
     freeze: false
   foxy:
-    freeze: false
+    freeze: true
   kinetic:
     freeze: false
   melodic:
