@@ -9,11 +9,12 @@ async function run() {
     try {
         const token = core.getInput("repo-token", { required: true });
 
-        const prNumber = getPrNumber();
-        if (!prNumber) {
+        const pullRequest = github.context.payload.pull_request;
+        if (!pullRequest) {
             console.log("Could not get pull request number from context, exiting");
             return;
         }
+        const prNumber = pullRequest.number;
 
         const client = new github.GitHub(token);
 
@@ -24,8 +25,13 @@ async function run() {
         console.log(`changed files: ${changedFiles}`);
 
         console.log(`About to read sync-freeze.yml`);
-        // FIXME: does this take into account changes to sync-freeze by *this* PR?
-        const sync_freeze = readSyncFreeze("sync-freeze.yaml");
+        // This reads the sync-freeze.yaml value for whatever branch/tag was specified
+        // in the workflow file.  Since that should (usually) be the 'master' branch,
+        // that means that you cannot both freeze/unfreeze a distribution and make changes to
+        // the distribution in the same PR.
+        const sync_data = await fs.readFile("sync-freeze.yaml");
+        const sync_freeze = yaml.safeLoad(sync_data);
+
         const frozen_distros: Map<string, boolean> = new Map();
         for (const distro in sync_freeze["distributions"]) {
             frozen_distros.set(distro, sync_freeze["distributions"][distro]["freeze"]);
@@ -54,15 +60,6 @@ async function run() {
     }
 }
 
-function getPrNumber(): number | undefined {
-    const pullRequest = github.context.payload.pull_request;
-    if (!pullRequest) {
-        return undefined;
-    }
-
-    return pullRequest.number;
-}
-
 async function getChangedFiles(
     client: github.GitHub,
     prNumber: number
@@ -82,34 +79,6 @@ async function getChangedFiles(
     }
 
     return changedFiles;
-}
-
-function readSyncFreeze(filename: string): any {
-    // FIXME: Make this async?
-    const rawdata = fs.readFileSync(filename);
-
-    const sync_freeze: any = yaml.safeLoad(rawdata);
-
-    return sync_freeze
-}
-
-async function getOpenPRs(client: github.GitHub): Promise<number[]> {
-    // FIXME: .endpoint.merge here, followed by paginate like above?
-    const prList = await client.pulls.list({
-        state: 'open',
-        owner: github.context.repo.owner,
-        repo: github.context.repo.repo
-    })
-
-    var prNums = new Array<number>();
-    for (const pr of prList.data) {
-        prNums.push(pr.number);
-        //const prNum = pr.number;
-        //const prState = pr.state;
-        //console.log(`PR #${prNum}, state: ${prState}`);
-    }
-
-    return prNums;
 }
 
 run();

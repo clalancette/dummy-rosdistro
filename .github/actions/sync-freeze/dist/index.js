@@ -14539,19 +14539,24 @@ function run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             const token = core.getInput("repo-token", { required: true });
-            const prNumber = getPrNumber();
-            if (!prNumber) {
+            const pullRequest = github.context.payload.pull_request;
+            if (!pullRequest) {
                 console.log("Could not get pull request number from context, exiting");
                 return;
             }
+            const prNumber = pullRequest.number;
             const client = new github.GitHub(token);
             console.log(`fetching changed files for pr #${prNumber}`);
             core.debug(`fetching changed files for pr #${prNumber}`);
             const changedFiles = yield getChangedFiles(client, prNumber);
             console.log(`changed files: ${changedFiles}`);
             console.log(`About to read sync-freeze.yml`);
-            // FIXME: does this take into account changes to sync-freeze by *this* PR?
-            const sync_freeze = readSyncFreeze("sync-freeze.yaml");
+            // This reads the sync-freeze.yaml value for whatever branch/tag was specified
+            // in the workflow file.  Since that should (usually) be the 'master' branch,
+            // that means that you cannot both freeze/unfreeze a distribution and make changes to
+            // the distribution in the same PR.
+            const sync_data = yield fs.readFile("sync-freeze.yaml");
+            const sync_freeze = yaml.safeLoad(sync_data);
             const frozen_distros = new Map();
             for (const distro in sync_freeze["distributions"]) {
                 frozen_distros.set(distro, sync_freeze["distributions"][distro]["freeze"]);
@@ -14579,13 +14584,6 @@ function run() {
         }
     });
 }
-function getPrNumber() {
-    const pullRequest = github.context.payload.pull_request;
-    if (!pullRequest) {
-        return undefined;
-    }
-    return pullRequest.number;
-}
 function getChangedFiles(client, prNumber) {
     return __awaiter(this, void 0, void 0, function* () {
         const listFilesOptions = client.pulls.listFiles.endpoint.merge({
@@ -14600,30 +14598,6 @@ function getChangedFiles(client, prNumber) {
             core.debug("  " + file);
         }
         return changedFiles;
-    });
-}
-function readSyncFreeze(filename) {
-    // FIXME: Make this async?
-    const rawdata = fs.readFileSync(filename);
-    const sync_freeze = yaml.safeLoad(rawdata);
-    return sync_freeze;
-}
-function getOpenPRs(client) {
-    return __awaiter(this, void 0, void 0, function* () {
-        // FIXME: .endpoint.merge here, followed by paginate like above?
-        const prList = yield client.pulls.list({
-            state: 'open',
-            owner: github.context.repo.owner,
-            repo: github.context.repo.repo
-        });
-        var prNums = new Array();
-        for (const pr of prList.data) {
-            prNums.push(pr.number);
-            //const prNum = pr.number;
-            //const prState = pr.state;
-            //console.log(`PR #${prNum}, state: ${prState}`);
-        }
-        return prNums;
     });
 }
 run();
