@@ -3,7 +3,6 @@ import * as github from "@actions/github";
 import * as yaml from "js-yaml";
 import { promises as fs } from "fs";
 
-//const fs = require("fs");
 const path = require("path");
 
 async function run() {
@@ -38,8 +37,6 @@ async function run() {
             frozen_distros.set(distro, sync_freeze["distributions"][distro]["freeze"]);
         }
 
-        const repo = github.context.repo;
-
         for (const filename of changedFiles) {
             console.log(`filename is ${filename}`);
             const modified_distro: string = path.dirname(filename);
@@ -50,6 +47,7 @@ async function run() {
                 // - Add a comment to the PR saying "ROS distribution 'foo' is in sync freeze, holding..."
                 // - Add a label to the PR with "sync-freeze"
                 // - Fail the CI check
+                //const repo = github.context.repo;
                 //client.issues.createComment({...repo, body: "hello", issue_number: prNumber});
                 core.setFailed(`ROS distribution ${modified_distro} is in freeze`);
                 return;

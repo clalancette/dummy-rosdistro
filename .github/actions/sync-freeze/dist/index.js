@@ -14534,7 +14534,6 @@ const core = __importStar(__webpack_require__(186));
 const github = __importStar(__webpack_require__(438));
 const yaml = __importStar(__webpack_require__(917));
 const fs_1 = __webpack_require__(747);
-//const fs = require("fs");
 const path = __webpack_require__(622);
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
@@ -14562,7 +14561,6 @@ function run() {
             for (const distro in sync_freeze["distributions"]) {
                 frozen_distros.set(distro, sync_freeze["distributions"][distro]["freeze"]);
             }
-            const repo = github.context.repo;
             for (const filename of changedFiles) {
                 console.log(`filename is ${filename}`);
                 const modified_distro = path.dirname(filename);
@@ -14573,6 +14571,7 @@ function run() {
                     // - Add a comment to the PR saying "ROS distribution 'foo' is in sync freeze, holding..."
                     // - Add a label to the PR with "sync-freeze"
                     // - Fail the CI check
+                    //const repo = github.context.repo;
                     //client.issues.createComment({...repo, body: "hello", issue_number: prNumber});
                     core.setFailed(`ROS distribution ${modified_distro} is in freeze`);
                     return;
