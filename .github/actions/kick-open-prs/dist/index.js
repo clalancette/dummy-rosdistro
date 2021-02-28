@@ -13616,6 +13616,7 @@ function run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             const token = core.getInput("repo-token", { required: true });
+            console.log("Starting kick-open-prs");
             const client = new github.GitHub(token);
             const prList = yield getOpenPRs(client);
         }
@@ -13627,13 +13628,14 @@ function run() {
 }
 function getOpenPRs(client) {
     return __awaiter(this, void 0, void 0, function* () {
-        // FIXME: .endpoint.merge here, followed by paginate like above?
+        console.log("Starting getOpenPRs");
         const prListOptions = yield client.pulls.list.endpoint.merge({
             state: 'open',
             owner: github.context.repo.owner,
             repo: github.context.repo.repo
         });
         const prList = yield client.paginate(prListOptions);
+        console.log("Starting iteration over prList");
         var prNums = new Array();
         for (const pr of prList) {
             console.log(`PR: ${pr}`);

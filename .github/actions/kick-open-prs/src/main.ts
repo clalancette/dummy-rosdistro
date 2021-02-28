@@ -9,6 +9,8 @@ async function run() {
     try {
         const token = core.getInput("repo-token", { required: true });
 
+        console.log("Starting kick-open-prs");
+
         const client = new github.GitHub(token);
 
         const prList: number[] = await getOpenPRs(client);
@@ -20,7 +22,9 @@ async function run() {
 }
 
 async function getOpenPRs(client: github.GitHub): Promise<Array<number>> {
-    // FIXME: .endpoint.merge here, followed by paginate like above?
+
+    console.log("Starting getOpenPRs");
+
     const prListOptions = await client.pulls.list.endpoint.merge({
         state: 'open',
         owner: github.context.repo.owner,
@@ -29,6 +33,7 @@ async function getOpenPRs(client: github.GitHub): Promise<Array<number>> {
 
     const prList = await client.paginate(prListOptions);
 
+    console.log("Starting iteration over prList");
     var prNums = new Array<number>();
     for (const pr of prList) {
         console.log(`PR: ${pr}`);
