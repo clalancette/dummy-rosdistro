@@ -7,6 +7,7 @@ on:
 
 jobs:
   retrigger:
+    runs-on: ubuntu-latest
     if: github.event.pull_request.merged == true
     steps:
       - echo "hello"
