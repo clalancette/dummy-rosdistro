@@ -8,6 +8,8 @@ jobs:
     steps:
     - name: Clone Repo
       uses: actions/checkout@v2
+      with:
+        ref: 'main'
 
     - name: Sync Freeze Check
       uses: ./.github/actions/sync-freeze
