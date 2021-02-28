@@ -13611,38 +13611,28 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const core = __importStar(__webpack_require__(186));
 const github = __importStar(__webpack_require__(438));
-const path = __webpack_require__(622);
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             const token = core.getInput("repo-token", { required: true });
             console.log("Starting kick-open-prs");
             const client = new github.GitHub(token);
-            const prList = yield getOpenPRs(client);
+            console.log("Starting getOpenPRs");
+            const prListOptions = client.pulls.list.endpoint.merge({
+                state: 'open',
+                owner: github.context.repo.owner,
+                repo: github.context.repo.repo
+            });
+            const prList = yield client.paginate(prListOptions);
+            for (const pr of prList) {
+                const json = JSON.stringify(pr);
+                console.log(`PR: ${json}`);
+            }
         }
         catch (error) {
             core.error(error);
             core.setFailed(error.message);
         }
-    });
-}
-function getOpenPRs(client) {
-    return __awaiter(this, void 0, void 0, function* () {
-        console.log("Starting getOpenPRs");
-        const prListOptions = yield client.pulls.list.endpoint.merge({
-            state: 'open',
-            owner: github.context.repo.owner,
-            repo: github.context.repo.repo
-        });
-        const prList = yield client.paginate(prListOptions);
-        console.log("Starting iteration over prList");
-        var prNums = new Array();
-        for (const pr of prList) {
-            const json = JSON.stringify(pr);
-            console.log(`PR: ${json}`);
-            //prNums.push(pr.number);
-        }
-        return prNums;
     });
 }
 run();
