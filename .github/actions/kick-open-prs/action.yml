@@ -1,0 +1,10 @@
+name: 'Kick open PRs to recheck sync freeze'
+description: 'Kick open PRs to recheck sync freeze'
+author: 'Open Robotics'
+inputs:
+  repo-token:
+    description: 'The GITHUB_TOKEN secret'
+
+runs:
+  using: 'node12'
+  main: 'dist/index.js'

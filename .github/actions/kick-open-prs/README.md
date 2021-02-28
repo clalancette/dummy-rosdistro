@@ -1,6 +1,6 @@
-# Sync freeze checker
+# Kick open PRs to recheck sync freeze
 
-Check if this PR changes a file in a ROS distribution, and if so, check if that distribution is in freeze.
+Kick open PRs to recheck the sync freeze status.
 
 ## Usage
 
@@ -14,18 +14,10 @@ on:
 - pull_request_target
 
 jobs:
-  check-distro-freeze:
+  triage:
     runs-on: ubuntu-latest
     steps:
-    - name: Clone Repo
-      uses: actions/checkout@v2
-      with:
-        # We always want to checkout the 'main' branch as that tells us
-        # the current state of the sync freezes
-        ref: 'main'
-
-    - name: Sync Freeze Check
-      uses: ./.github/actions/sync-freeze
+    - uses: actions/kick-open-prs
       with:
         repo-token: "${{ secrets.GITHUB_TOKEN }}"
 ```
@@ -34,7 +26,7 @@ _Note: This grants access to the `GITHUB_TOKEN` so the action can make calls to 
 
 #### Inputs
 
-Various inputs are defined in [`action.yml`](action.yml) to let you configure the sync freeze:
+Various inputs are defined in [`action.yml`](action.yml) to let you configure the labeler:
 
 | Name | Description | Default |
 | - | - | - |
