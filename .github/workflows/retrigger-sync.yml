@@ -1,0 +1,12 @@
+name: "Retrigger open PRs on merge"
+on:
+  pull_request:
+    branches:
+      - main
+    types: [closed]
+
+jobs:
+  retrigger:
+    if: github.event.pull_request.merged == true
+    steps:
+      - echo "hello"

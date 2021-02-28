@@ -9,6 +9,8 @@ jobs:
     - name: Clone Repo
       uses: actions/checkout@v2
       with:
+        # We always want to checkout the 'main' branch as that tells us
+        # the current state of the sync freezes
         ref: 'main'
 
     - name: Sync Freeze Check
