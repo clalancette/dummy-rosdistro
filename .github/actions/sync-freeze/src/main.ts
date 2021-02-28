@@ -161,7 +161,12 @@ async function getOpenPRs(client: github.GitHub): Promise<number[]> {
         repo: github.context.repo.repo
     })
 
-    console.log('pullRequestList: ' + JSON.stringify(prList));
+    //console.log('pullRequestList: ' + JSON.stringify(prList));
+    for (const pr of prList.data) {
+        const prNum = pr.id;
+        const prState = pr.state;
+        console.log(`PR #${prNum}, state: ${prState}`);
+    }
 
     return new Array<number>();
 }
