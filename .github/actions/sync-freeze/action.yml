@@ -4,10 +4,6 @@ author: 'Open Robotics'
 inputs:
   repo-token:
     description: 'The GITHUB_TOKEN secret'
-  configuration-path:
-    description: 'The path for the label configurations'
-    default: '.github/sync-freeze.yml'
-    required: false
 
 runs:
   using: 'node12'

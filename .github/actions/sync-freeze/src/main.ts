@@ -16,7 +16,6 @@ const path = require("path");
 async function run() {
     try {
         const token = core.getInput("repo-token", { required: true });
-        const configPath = core.getInput("configuration-path", { required: true });
 
         const prNumber = getPrNumber();
         if (!prNumber) {
@@ -47,10 +46,12 @@ async function run() {
 
         const repo = github.context.repo;
 
-        for (const distro of frozen_distros.keys()) {
-            console.log(`Frozen distros: ${distro}`);
-        }
+        var modifies_sync_freeze = false;
         for (const filename of changedFiles) {
+            if (filename === "sync-freeze.yaml") {
+                modifies_sync_freeze = true;
+                continue;
+            }
             console.log(`filename is ${filename}`);
             const modified_distro = path.dirname(filename);
             console.log(`Modified distro is ${modified_distro}`);
@@ -60,94 +61,48 @@ async function run() {
             }
         }
 
-        const prList = getOpenPRs(client);
-
-  //   for (const distro in sync_freeze["distributions"]) {
-  //     console.log(`Saw distribution ${distro}`);
-  //       if (sync_freeze["distributions"][distro]["freeze"]) {
-  //           console.log("In freeze!");
-  //           const repo = github.context.repo;
-  //           client.issues.createComment({...repo, body: "hello", issue_number: prNumber});
-  //       } else {
-  //           console.log("Not in freeze");
-  //     }
-  //   }
-
-  // const labelGlobs: Map<string, StringOrMatchConfig[]> = new Map();
-  // for (const label in configObject) {
-  //   if (typeof configObject[label] === "string") {
-  //     labelGlobs.set(label, [configObject[label]]);
-  //   } else if (configObject[label] instanceof Array) {
-  //     labelGlobs.set(label, configObject[label]);
-  //   } else {
-  //     throw Error(
-  //       `found unexpected type for label ${label} (should be string or array of globs)`
-  //     );
-  //   }
-  // }
-
-  // return labelGlobs;
-
-    // const labelGlobs: Map<string, StringOrMatchConfig[]> = await getLabelGlobs(
-    //   client,
-    //   configPath
-    // );
-
-    // const labels: string[] = [];
-    // const labelsToRemove: string[] = [];
-    // for (const [label, globs] of labelGlobs.entries()) {
-    //   core.debug(`processing ${label}`);
-    //   if (checkGlobs(changedFiles, globs)) {
-    //     labels.push(label);
-    //   } else if (pullRequest.labels.find(l => l.name === label)) {
-    //     labelsToRemove.push(label);
-    //   }
-    // }
-
-    // if (labels.length > 0) {
-    //   await addLabels(client, prNumber, labels);
-    // }
-
-    // if (syncLabels && labelsToRemove.length) {
-    //   await removeLabels(client, prNumber, labelsToRemove);
-    // }
-  } catch (error) {
-    core.error(error);
-    core.setFailed(error.message);
-  }
+        // Temporary just for testing
+        modifies_sync_freeze = true;
+        if (modifies_sync_freeze) {
+            const prList = getOpenPRs(client);
+        }
+    } catch (error) {
+        core.error(error);
+        core.setFailed(error.message);
+    }
 }
 
 function getPrNumber(): number | undefined {
-  const pullRequest = github.context.payload.pull_request;
-  if (!pullRequest) {
-    return undefined;
-  }
+    const pullRequest = github.context.payload.pull_request;
+    if (!pullRequest) {
+        return undefined;
+    }
 
-  return pullRequest.number;
+    return pullRequest.number;
 }
 
 async function getChangedFiles(
-  client: github.GitHub,
-  prNumber: number
+    client: github.GitHub,
+    prNumber: number
 ): Promise<string[]> {
-  const listFilesOptions = client.pulls.listFiles.endpoint.merge({
-    owner: github.context.repo.owner,
-    repo: github.context.repo.repo,
-    pull_number: prNumber
-  });
+    const listFilesOptions = client.pulls.listFiles.endpoint.merge({
+        owner: github.context.repo.owner,
+        repo: github.context.repo.repo,
+        pull_number: prNumber
+    });
 
-  const listFilesResponse = await client.paginate(listFilesOptions);
-  const changedFiles = listFilesResponse.map(f => f.filename);
+    const listFilesResponse = await client.paginate(listFilesOptions);
+    const changedFiles = listFilesResponse.map(f => f.filename);
 
-  core.debug("found changed files:");
-  for (const file of changedFiles) {
-    core.debug("  " + file);
-  }
+    core.debug("found changed files:");
+    for (const file of changedFiles) {
+        core.debug("  " + file);
+    }
 
-  return changedFiles;
+    return changedFiles;
 }
 
-function readSyncFreeze(filename: string) {
+function readSyncFreeze(filename: string): any {
     const rawdata = fs.readFileSync(filename);
 
     const sync_freeze: any = yaml.safeLoad(rawdata);
@@ -157,13 +112,14 @@ function readSyncFreeze(filename: string) {
 
 async function getOpenPRs(client: github.GitHub): Promise<number[]> {
     const prList = await client.pulls.list({
+        state: 'open',
         owner: github.context.repo.owner,
         repo: github.context.repo.repo
     })
 
     //console.log('pullRequestList: ' + JSON.stringify(prList));
     for (const pr of prList.data) {
-        const prNum = pr.id;
+        const prNum = pr.number;
         const prState = pr.state;
         console.log(`PR #${prNum}, state: ${prState}`);
     }

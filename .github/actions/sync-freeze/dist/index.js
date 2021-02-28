@@ -14540,7 +14540,6 @@ function run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             const token = core.getInput("repo-token", { required: true });
-            const configPath = core.getInput("configuration-path", { required: true });
             const prNumber = getPrNumber();
             if (!prNumber) {
                 console.log("Could not get pull request number from context, exiting");
@@ -14563,10 +14562,12 @@ function run() {
                 frozen_distros.set(distro, sync_freeze["distributions"][distro]["freeze"]);
             }
             const repo = github.context.repo;
-            for (const distro of frozen_distros.keys()) {
-                console.log(`Frozen distros: ${distro}`);
-            }
+            var modifies_sync_freeze = false;
             for (const filename of changedFiles) {
+                if (filename === "sync-freeze.yaml") {
+                    modifies_sync_freeze = true;
+                    continue;
+                }
                 console.log(`filename is ${filename}`);
                 const modified_distro = path.dirname(filename);
                 console.log(`Modified distro is ${modified_distro}`);
@@ -14575,50 +14576,11 @@ function run() {
                     client.issues.createComment(Object.assign(Object.assign({}, repo), { body: "hello", issue_number: prNumber }));
                 }
             }
-            const prList = getOpenPRs(client);
-            //   for (const distro in sync_freeze["distributions"]) {
-            //     console.log(`Saw distribution ${distro}`);
-            //       if (sync_freeze["distributions"][distro]["freeze"]) {
-            //           console.log("In freeze!");
-            //           const repo = github.context.repo;
-            //           client.issues.createComment({...repo, body: "hello", issue_number: prNumber});
-            //       } else {
-            //           console.log("Not in freeze");
-            //     }
-            //   }
-            // const labelGlobs: Map<string, StringOrMatchConfig[]> = new Map();
-            // for (const label in configObject) {
-            //   if (typeof configObject[label] === "string") {
-            //     labelGlobs.set(label, [configObject[label]]);
-            //   } else if (configObject[label] instanceof Array) {
-            //     labelGlobs.set(label, configObject[label]);
-            //   } else {
-            //     throw Error(
-            //       `found unexpected type for label ${label} (should be string or array of globs)`
-            //     );
-            //   }
-            // }
-            // return labelGlobs;
-            // const labelGlobs: Map<string, StringOrMatchConfig[]> = await getLabelGlobs(
-            //   client,
-            //   configPath
-            // );
-            // const labels: string[] = [];
-            // const labelsToRemove: string[] = [];
-            // for (const [label, globs] of labelGlobs.entries()) {
-            //   core.debug(`processing ${label}`);
-            //   if (checkGlobs(changedFiles, globs)) {
-            //     labels.push(label);
-            //   } else if (pullRequest.labels.find(l => l.name === label)) {
-            //     labelsToRemove.push(label);
-            //   }
-            // }
-            // if (labels.length > 0) {
-            //   await addLabels(client, prNumber, labels);
-            // }
-            // if (syncLabels && labelsToRemove.length) {
-            //   await removeLabels(client, prNumber, labelsToRemove);
-            // }
+            // Temporary just for testing
+            modifies_sync_freeze = true;
+            if (modifies_sync_freeze) {
+                const prList = getOpenPRs(client);
+            }
         }
         catch (error) {
             core.error(error);
@@ -14657,12 +14619,13 @@ function readSyncFreeze(filename) {
 function getOpenPRs(client) {
     return __awaiter(this, void 0, void 0, function* () {
         const prList = yield client.pulls.list({
+            state: 'open',
             owner: github.context.repo.owner,
             repo: github.context.repo.repo
         });
         //console.log('pullRequestList: ' + JSON.stringify(prList));
         for (const pr of prList.data) {
-            const prNum = pr.id;
+            const prNum = pr.number;
             const prState = pr.state;
             console.log(`PR #${prNum}, state: ${prState}`);
         }
