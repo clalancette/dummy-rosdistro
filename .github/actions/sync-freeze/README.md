@@ -102,7 +102,6 @@ Various inputs are defined in [`action.yml`](action.yml) to let you configure th
 | Name | Description | Default |
 | - | - | - |
 | `repo-token` | Token to use to authorize label changes. Typically the GITHUB_TOKEN secret | N/A |
-| `configuration-path` | The path to the label configuration file | `.github/sync-freeze.yml` |
 
 ## Building
 
