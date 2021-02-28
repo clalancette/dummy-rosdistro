@@ -25,6 +25,7 @@ async function run() {
 
         const client = new github.GitHub(token);
 
+        // FIXME: do we need this at all?
         const { data: pullRequest } = await client.pulls.get({
             owner: github.context.repo.owner,
             repo: github.context.repo.repo,
@@ -38,6 +39,7 @@ async function run() {
         console.log(`changed files: ${changedFiles}`);
 
         console.log(`About to read sync-freeze.yml`);
+        // FIXME: does this take into account changes to sync-freeze by *this* PR?
         const sync_freeze = readSyncFreeze("sync-freeze.yaml");
         const frozen_distros: Map<string, boolean> = new Map();
         for (const distro in sync_freeze["distributions"]) {
@@ -46,25 +48,44 @@ async function run() {
 
         const repo = github.context.repo;
 
-        var modifies_sync_freeze = false;
+        var modifies_sync_freeze: boolean = false;
         for (const filename of changedFiles) {
             if (filename === "sync-freeze.yaml") {
                 modifies_sync_freeze = true;
                 continue;
             }
             console.log(`filename is ${filename}`);
-            const modified_distro = path.dirname(filename);
+            const modified_distro: string = path.dirname(filename);
             console.log(`Modified distro is ${modified_distro}`);
             if (frozen_distros.has(modified_distro) && frozen_distros.get(modified_distro)) {
                 console.log("In freeze!");
-                client.issues.createComment({...repo, body: "hello", issue_number: prNumber});
+                //client.issues.createComment({...repo, body: "hello", issue_number: prNumber});
+                core.error(`ROS distribution ${modified_distro} is in freeze`);
+                core.setFailed(`ROS distribution ${modified_distro} is in freeze`);
+                return;
             }
         }
 
-        // Temporary just for testing
+        // FIXME: Temporary just for testing
         modifies_sync_freeze = true;
         if (modifies_sync_freeze) {
-            const prList = getOpenPRs(client);
+            const prList: Array<number> = await getOpenPRs(client);
+            // FIXME: maybe we can combine this with the list in getOpenPRs for performance
+            for (const pr of prList) {
+                // Skip this PR in the list
+                if (pr == prNumber) {
+                    continue;
+                }
+
+                console.log(`Looking at PR #{pr}`);
+
+                // FIXME: the below is an attempt to make kicking other PRs a little more targeted (so we only kick those who have changed)
+                // const otherFiles: string[] = await getChangedFiles(client, pr);
+                // for (const filename of changedFiles) {
+                //     console.log(`other filename is ${filename}`);
+                //     const modified_distro: string = path.dirname(filename);
+                // }
+            }
         }
     } catch (error) {
         core.error(error);
@@ -103,6 +124,7 @@ async function getChangedFiles(
 }
 
 function readSyncFreeze(filename: string): any {
+    // FIXME: Make this async?
     const rawdata = fs.readFileSync(filename);
 
     const sync_freeze: any = yaml.safeLoad(rawdata);
@@ -111,20 +133,22 @@ function readSyncFreeze(filename: string): any {
 }
 
 async function getOpenPRs(client: github.GitHub): Promise<number[]> {
+    // FIXME: .endpoint.merge here, followed by paginate like above?
     const prList = await client.pulls.list({
         state: 'open',
         owner: github.context.repo.owner,
         repo: github.context.repo.repo
     })
 
-    //console.log('pullRequestList: ' + JSON.stringify(prList));
+    var prNums = new Array<number>();
     for (const pr of prList.data) {
-        const prNum = pr.number;
-        const prState = pr.state;
-        console.log(`PR #${prNum}, state: ${prState}`);
+        prNums.push(pr.number);
+        //const prNum = pr.number;
+        //const prState = pr.state;
+        //console.log(`PR #${prNum}, state: ${prState}`);
     }
 
-    return new Array<number>();
+    return prNums;
 }
 
 async function getLabelGlobs(
