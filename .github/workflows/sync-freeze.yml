@@ -1,6 +1,7 @@
 name: "Check for Sync Freeze"
 on:
 - pull_request_target
+- workflow_dispatch
 
 jobs:
   check-distro-freeze:

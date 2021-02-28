@@ -1,6 +1,8 @@
 import * as core from "@actions/core";
 import * as github from "@actions/github";
 
+const { Octokit } = require("@octokit/core");
+
 async function run() {
     try {
         const token = core.getInput("repo-token", { required: true });
@@ -17,10 +19,19 @@ async function run() {
             repo: github.context.repo.repo
         })
 
+        const octokit = new Octokit({
+            auth: token
+        });
         const prList = await client.paginate(prListOptions);
         for (const pr of prList) {
             const json = JSON.stringify(pr);
             console.log(`PR: ${json}`);
+            const request = await octokit.request('POST /repos/{owner}/{repo}/actions/workflows/{workflow_id}/dispatches', {
+                owner: github.context.repo.owner,
+                repo: github.context.repo.repo,
+                workflow_id: 'sync-freeze.yml',
+                ref: pr.head.ref
+            });
         }
 
     } catch (error) {
