@@ -10,6 +10,15 @@ jobs:
     runs-on: ubuntu-latest
     if: github.event.pull_request.merged == true
     steps:
+    - name: Clone Repo
+      uses: actions/checkout@v2
+      with:
+        # We always want to checkout the 'main' branch as that tells us
+        # the current state of the sync freeze.  Note that this makes it
+        # so that you can't test changes to the sync-freeze action code
+        # via a PR.
+        ref: 'main'
+
     - name: Rekick open PRs
       uses: ./.github/actions/kick-open-prs
       with:
