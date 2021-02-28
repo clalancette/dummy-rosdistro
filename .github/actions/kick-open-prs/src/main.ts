@@ -36,7 +36,8 @@ async function getOpenPRs(client: github.GitHub): Promise<Array<number>> {
     console.log("Starting iteration over prList");
     var prNums = new Array<number>();
     for (const pr of prList) {
-        console.log(`PR: ${pr}`);
+        const json = JSON.stringify(pr);
+        console.log(`PR: ${json}`);
         //prNums.push(pr.number);
     }
 

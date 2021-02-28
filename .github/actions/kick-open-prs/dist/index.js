@@ -13638,7 +13638,8 @@ function getOpenPRs(client) {
         console.log("Starting iteration over prList");
         var prNums = new Array();
         for (const pr of prList) {
-            console.log(`PR: ${pr}`);
+            const json = JSON.stringify(pr);
+            console.log(`PR: ${json}`);
             //prNums.push(pr.number);
         }
         return prNums;
