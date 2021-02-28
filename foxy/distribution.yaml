@@ -10,7 +10,7 @@ repositories:
     doc:
       type: git
       url: https://github.com/ros-drivers/ackermann_msgs.git
-      version: ros
+      version: ros2
     release:
       tags:
         release: release/foxy/{package}/{version}
