@@ -14533,7 +14533,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const core = __importStar(__webpack_require__(186));
 const github = __importStar(__webpack_require__(438));
 const yaml = __importStar(__webpack_require__(917));
-const fs = __webpack_require__(747);
+const fs_1 = __webpack_require__(747);
+//const fs = require("fs");
 const path = __webpack_require__(622);
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
@@ -14555,7 +14556,7 @@ function run() {
             // in the workflow file.  Since that should (usually) be the 'master' branch,
             // that means that you cannot both freeze/unfreeze a distribution and make changes to
             // the distribution in the same PR.
-            const sync_data = yield fs.readFile("sync-freeze.yaml");
+            const sync_data = yield fs_1.promises.readFile("sync-freeze.yaml", "utf8");
             const sync_freeze = yaml.safeLoad(sync_data);
             const frozen_distros = new Map();
             for (const distro in sync_freeze["distributions"]) {
